@@ -4,19 +4,22 @@ import paho.mqtt.client as mqtt
 
 def setupPin(pinNumber):
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(pinNumber, GPIO.IN)
+	GPIO.setup(pinNumber, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 mqttc = mqtt.Client("physical_button")
 mqttc.connect("localhost", 1883)
 
-pin = 15 
+pin = 17 
 setupPin(pin)
+print "Waiting for pin to setup..."
 time.sleep(10)
 while True:
-	if (GPIO.input(pin)):
-		print "Button pressed..."
-		mqttc.publish("RPI/door", 1)
-		mqttc.loop(2)
-		time.sleep(5)
-	time.sleep(0.5)
+	try:
+		if GPIO.input(pin) == False:
+			print "Button pressed..."
+			mqttc.publish("RPI/door", 1)
+			mqttc.loop(2)
+			time.sleep(5)
+	except:
+		print "Exception occured while pressing button..."
 
